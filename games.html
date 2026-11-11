@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Games • Aurora</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Poppins', sans-serif; }</style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-600 via-green-500 to-purple-700 text-white flex flex-col items-center py-10 px-6">
+  <header class="text-center mb-8">
+    <h1 class="text-5xl font-bold drop-shadow-lg">Mini Games</h1>
+    <p class="text-lg mt-3 opacity-90">A couple of little games made for this site</p>
+  </header>
+  <nav aria-label="Main navigation" class="mb-10 flex flex-wrap justify-center gap-3">
+    <a class="rounded-full bg-white/20 px-5 py-2 font-semibold hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white" href="index.html">Home</a>
+    <a class="rounded-full bg-white/20 px-5 py-2 font-semibold hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white" href="games.html" aria-current="page">Games</a>
+    <a class="rounded-full bg-white/20 px-5 py-2 font-semibold hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white" href="search.html">Search</a>
+    <a class="rounded-full bg-white/20 px-5 py-2 font-semibold hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white" href="work.html">Work</a>
+  </nav>
+
+  <main class="grid w-full max-w-5xl gap-6 md:grid-cols-2">
+    <section class="rounded-2xl bg-white/10 p-7 shadow-xl backdrop-blur-md">
+      <h2 class="mb-2 text-2xl font-semibold">Catch the Aurora</h2>
+      <p class="mb-5 opacity-90">Tap the glowing orb as many times as you can before time runs out!</p>
+      <div class="mb-4 flex items-center justify-between text-lg" aria-live="polite">
+        <span>Score: <strong id="score">0</strong></span>
+        <span>Time: <strong id="time">15</strong>s</span>
+      </div>
+      <div id="play-area" class="relative h-64 overflow-hidden rounded-xl border border-white/30 bg-slate-950/20" aria-label="Game area">
+        <button id="orb" type="button" aria-label="Catch the glowing aurora" class="absolute hidden h-12 w-12 rounded-full bg-cyan-200 shadow-[0_0_30px_10px_rgba(103,232,249,0.8)] transition-transform hover:scale-125 focus:outline-none focus:ring-4 focus:ring-white"></button>
+        <p id="game-hint" class="absolute inset-0 grid place-items-center px-4 text-center opacity-80">Press Start, then catch the orb!</p>
+      </div>
+      <button id="start-catch" class="mt-5 rounded-full bg-white px-6 py-2 font-semibold text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-white">Start game</button>
+      <p id="catch-result" class="mt-3 min-h-6" aria-live="polite"></p>
+    </section>
+
+    <section class="rounded-2xl bg-white/10 p-7 shadow-xl backdrop-blur-md">
+      <h2 class="mb-2 text-2xl font-semibold">Number Nebula</h2>
+      <p class="mb-5 opacity-90">Guess the secret number from 1 to 50. I'll tell you if it's higher or lower.</p>
+      <form id="guess-form" class="flex flex-wrap gap-3">
+        <label class="sr-only" for="guess">Your guess</label>
+        <input id="guess" type="number" min="1" max="50" required class="min-w-0 flex-1 rounded-xl border border-white/40 bg-white/90 px-4 py-3 text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-200" placeholder="1–50" />
+        <button class="rounded-full bg-white px-5 py-3 font-semibold text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-white" type="submit">Guess</button>
+      </form>
+      <p id="guess-message" class="mt-5 min-h-7" aria-live="polite">Ready when you are!</p>
+      <p id="guess-count" class="mt-2 text-sm opacity-80">Guesses: 0</p>
+      <button id="new-number" class="mt-5 rounded-full border border-white/70 px-5 py-2 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white" type="button">New number</button>
+    </section>
+  </main>
+
+  <footer class="mt-12 text-center text-sm opacity-70">© 2026 Sparsh Thakkar</footer>
+  <script>
+    const orb = document.getElementById('orb');
+    const playArea = document.getElementById('play-area');
+    const scoreText = document.getElementById('score');
+    const timeText = document.getElementById('time');
+    const hint = document.getElementById('game-hint');
+    const catchResult = document.getElementById('catch-result');
+    let score = 0;
+    let seconds = 15;
+    let timer;
+
+    function moveOrb() {
+      const maxX = Math.max(0, playArea.clientWidth - orb.offsetWidth);
+      const maxY = Math.max(0, playArea.clientHeight - orb.offsetHeight);
+      orb.style.left = `${Math.floor(Math.random() * (maxX + 1))}px`;
+      orb.style.top = `${Math.floor(Math.random() * (maxY + 1))}px`;
+    }
+    document.getElementById('start-catch').addEventListener('click', () => {
+      clearInterval(timer);
+      score = 0;
+      seconds = 15;
+      scoreText.textContent = score;
+      timeText.textContent = seconds;
+      catchResult.textContent = '';
+      hint.classList.add('hidden');
+      orb.classList.remove('hidden');
+      moveOrb();
+      timer = setInterval(() => {
+        seconds -= 1;
+        timeText.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(timer);
+          orb.classList.add('hidden');
+          hint.classList.remove('hidden');
+          hint.textContent = 'Time is up! Press Start to play again.';
+          catchResult.textContent = `You caught ${score} auroras!`;
+        }
+      }, 1000);
+    });
+    orb.addEventListener('click', () => {
+      if (seconds <= 0) return;
+      score += 1;
+      scoreText.textContent = score;
+      moveOrb();
+    });
+
+    let secret = Math.floor(Math.random() * 50) + 1;
+    let guesses = 0;
+    const guessInput = document.getElementById('guess');
+    const guessMessage = document.getElementById('guess-message');
+    const guessCount = document.getElementById('guess-count');
+    document.getElementById('guess-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const guess = Number(guessInput.value);
+      if (!Number.isInteger(guess) || guess < 1 || guess > 50) {
+        guessMessage.textContent = 'Pick a whole number from 1 to 50.';
+        return;
+      }
+      guesses += 1;
+      guessCount.textContent = `Guesses: ${guesses}`;
+      if (guess === secret) {
+        guessMessage.textContent = `You got it in ${guesses} ${guesses === 1 ? 'guess' : 'guesses'}! ✨`;
+      } else {
+        guessMessage.textContent = guess < secret ? 'Aim higher ☝️' : 'Aim lower 👇';
+      }
+      guessInput.select();
+    });
+    document.getElementById('new-number').addEventListener('click', () => {
+      secret = Math.floor(Math.random() * 50) + 1;
+      guesses = 0;
+      guessCount.textContent = 'Guesses: 0';
+      guessMessage.textContent = 'A new number is hiding in the nebula!';
+      guessInput.value = '';
+      guessInput.focus();
+    });
+  </script>
+</body>
+</html>
